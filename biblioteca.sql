@@ -43,3 +43,12 @@ create table Editoriales{
     ediEmail varchar(255)
 }
 
+create table Libros{
+    idLibro int auto_increment primary key,
+    libTitulo varchar(100),
+    libAnio varchar(6),
+    libNotaDeContenido varchar(255),
+    editorialID int,
+    materiaID int,
+    autorID int
+}
