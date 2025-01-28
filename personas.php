@@ -92,6 +92,28 @@ function handlePostRequest($pdo){
 
 }
 function handlePutRequest($pdo){
+
+    $data = json_decode(file_get_contents("php://input"));
+    if(isset($data->perNombre)){
+        $sql = "UPDATE personas set perNombre=(:perNombre), perApellido=(:perApellido), perDni=(:perDni), perContrasena=(:perContrasena), rolID=(:rolID) where idPersona = (:idPersona)";
+        $stmt = $pdo->prepare($sql);
+        $stmt
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 function handleDeleteRequest($pdo){
 }
