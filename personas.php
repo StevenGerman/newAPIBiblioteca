@@ -20,16 +20,16 @@ $pdo = new Conexion();
 
 
 
-/*match ($_SERVER['REQUEST_METHOD']) {
+match ($_SERVER['REQUEST_METHOD']) {
     'GET' => handleGetRequest($pdo),
     'POST' => handlePostRequest($pdo),
     'PUT' => handlePutRequest($pdo),
     'DELETE' => handleDeleteRequest($pdo),
     'OPTIONS' => header("HTTP/1.1 200 OK"),
     default => header("HTTP/1.1 405 Method Not Allowed"),
-};*/
+};
 
-
+/*
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
         handleGetRequest($pdo);
@@ -50,7 +50,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     default:
         header("HTTP/1.1 405 Method Not Allowed");
         break;
-}
+}*/
 
 function handleGetRequest($pdo){
     $sql = $pdo->prepare("SELECT * FROM Personas");
@@ -65,10 +65,10 @@ function handlePostRequest($pdo){
 
     $data = json_decode(file_get_contents("php://input"));
     if(isset($data->perNombre)){
-        $sql = "INSERT INTO personas (perNombre,perApellido,perDni,perContrasena,rolID), values ((:perNombre),(:perApellido),(:perDni),(:perContrasena),(:rolID));";
+        $sql = "INSERT INTO personas (perNombre,perApellido,perDni,perContrasena,rolID) values ((:perNombre),(:perApellido),(:perDni),(:perContrasena),(:rolID));";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':perNombre', $data->perNombre);
-        $stmt->bindParam(':perApellido' $data->perApellido);
+        $stmt->bindParam(':perApellido', $data->perApellido);
         $stmt->bindParam(':perDni', $data->perDni);
         $stmt->bindParam(':perContrasena', $data->perContrasena);
         $stmt->bindParam(':rolID', $data->rolID);
