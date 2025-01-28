@@ -16,6 +16,20 @@ $pdo = new Conexion();
 
 
 // Maneja la solicitud según el método HTTP
+
+
+
+
+/*match ($_SERVER['REQUEST_METHOD']) {
+    'GET' => handleGetRequest($pdo),
+    'POST' => handlePostRequest($pdo),
+    'PUT' => handlePutRequest($pdo),
+    'DELETE' => handleDeleteRequest($pdo),
+    'OPTIONS' => header("HTTP/1.1 200 OK"),
+    default => header("HTTP/1.1 405 Method Not Allowed"),
+};*/
+
+
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
         handleGetRequest($pdo);
@@ -48,6 +62,34 @@ function handleGetRequest($pdo){
 }
 
 function handlePostRequest($pdo){
+
+    $data = json_decode(file_get_contents("php://input"));
+    if(isset($data->perNombre)){
+        $sql = "INSERT INTO personas (perNombre,perApellido,perDni,perContrasena,rolID), values ((:perNombre),(:perApellido),(:perDni),(:perContrasena),(:rolID));";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':perNombre', $data->perNombre);
+        $stmt->bindParam(':perApellido' $data->perApellido);
+        $stmt->bindParam(':perDni', $data->perDni);
+        $stmt->bindParam(':perContrasena', $data->perContrasena);
+        $stmt->bindParam(':rolID', $data->rolID);
+
+        if($stmt->execute()){
+            $idPost = $pdo->lastInsertId();
+            header("HTPP/1.1 201 Created");
+            echo json_encode($idPost);//Restorna el ID de la persona creada.
+        }else{
+            header("HTPP/1.1 500 Internal Server Error");
+            echo json_encode(['error' => 'No se pudo crear la persona']);
+        }
+    }else{
+        header("HTTP/1.1 400 Bad Request");
+        echo json_encode(['error' => 'Entrada inválida']);
+    }
+    exit;
+
+
+
+
 }
 function handlePutRequest($pdo){
 }
