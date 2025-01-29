@@ -87,6 +87,8 @@ function handlePostRequest($pdo){
     }
     exit;
 
+    
+
 
 
 
@@ -97,7 +99,7 @@ function handlePutRequest($pdo){
     if(isset($data->perNombre)){
         $sql = "UPDATE personas set perNombre=(:perNombre), perApellido=(:perApellido), perDni=(:perDni), perContrasena=(:perContrasena), rolID=(:rolID) where idPersona = (:idPersona)";
         $stmt = $pdo->prepare($sql);
-        $stmt
+        $stmt = 
     }
 
 
