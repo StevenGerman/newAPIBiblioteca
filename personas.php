@@ -18,30 +18,18 @@ $pdo = new Conexion();
 // Maneja la solicitud según el método HTTP
 
 
-
-
-match ($_SERVER['REQUEST_METHOD']) {
-    'GET' => handleGetRequest($pdo),
-    'POST' => handlePostRequest($pdo),
-    'PUT' => handlePutRequest($pdo),
-    'DELETE' => handleDeleteRequest($pdo),
-    'OPTIONS' => header("HTTP/1.1 200 OK"),
-    default => header("HTTP/1.1 405 Method Not Allowed"),
-};
-
-/*
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
-        handleGetRequest($pdo);
+        getRequest($pdo);
         break;
     case 'POST':
-        handlePostRequest($pdo);
+        postRequest($pdo);
         break;
     case 'PUT':
-        handlePutRequest($pdo);
+        putRequest($pdo);
         break;
     case 'DELETE':
-        handleDeleteRequest($pdo);
+        deleteRequest($pdo);
         break;
     case 'OPTIONS':
         // Maneja las solicitudes preflight
@@ -50,10 +38,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
     default:
         header("HTTP/1.1 405 Method Not Allowed");
         break;
-}*/
+}
 
-function handleGetRequest($pdo){
-    $sql = $pdo->prepare("SELECT * FROM Personas");
+function getRequest($pdo){
+    $sql = $pdo->prepare("SELECT * FROM personas");
         $sql->execute();
         $sql->setFetchMode(PDO::FETCH_ASSOC);
         header("HTTP/1.1 200 OK");
@@ -61,7 +49,7 @@ function handleGetRequest($pdo){
     exit;
 }
 
-function handlePostRequest($pdo){
+function postRequest($pdo){
 
     $data = json_decode(file_get_contents("php://input"));
     if(isset($data->perNombre)){
@@ -84,40 +72,60 @@ function handlePostRequest($pdo){
     }else{
         header("HTTP/1.1 400 Bad Request");
         echo json_encode(['error' => 'Entrada inválida']);
+        exit;
     }
-    exit;
-
     
-
-
-
-
 }
-function handlePutRequest($pdo){
 
+
+function putRequest($pdo){
     $data = json_decode(file_get_contents("php://input"));
+
+
+
     if(isset($data->perNombre)){
         $sql = "UPDATE personas set perNombre=(:perNombre), perApellido=(:perApellido), perDni=(:perDni), perContrasena=(:perContrasena), rolID=(:rolID) where idPersona = (:idPersona)";
         $stmt = $pdo->prepare($sql);
-        $stmt = 
+        $stmt->bindParam(':perNombre', $data->perNombre);
+        $stmt->bindParam(':perApellido',$data->perApellido);
+        $stmt->bindParam(':perDni', $data->perDni);
+        $stmt->bindParam(':perContrasena', $data->perContrasena);
+        $stmt->bindParam(':rolID', $data->rolID);
+        $stmt->bindParam(':idPersona', $data->idPersona);
+        if ($stmt->execute()) {
+            header("HTTP/1.1 200 OK");
+            echo json_encode(['message' => 'Actualización exitosa']); // Retorna un mensaje de éxito
+        } else {
+            header("HTTP/1.1 500 Internal Server Error");
+            echo json_encode(['error' => 'No se pudo actualizar la persona']);
+        }
+    } else {
+        header("HTTP/1.1 400 Bad Request");
+        echo json_encode(['error' => 'Entrada inválida']);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    exit;
 
 }
-function handleDeleteRequest($pdo){
+
+
+function deleteRequest($pdo){
+ // Verifica si se proporciona 'idPersona'
+ if (isset($_GET['idPersona'])) {
+    $sql = "DELETE FROM Personas WHERE idPersona=:idPersona";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':idPersona', $_GET['idPersona']);
+    if ($stmt->execute()) {
+        header("HTTP/1.1 200 OK");
+        echo json_encode(['message' => 'Eliminación exitosa']); // Retorna un mensaje de éxito
+    } else {
+        header("HTTP/1.1 500 Internal Server Error");
+        echo json_encode(['error' => 'No se pudo eliminar la persona']);
+    }
+} else {
+    header("HTTP/1.1 400 Bad Request");
+    echo json_encode(['error' => 'Entrada inválida']);
+}
+exit;
 }
 
 
