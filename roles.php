@@ -26,6 +26,8 @@ switch($_SERVER['REQUEST_METHOD']){
     case 'DELETE':
         deleteRequest($pdo);
         break;
+    default:
+        header("HTTP/1.1 405 Method Not Allowed");
 
 }
 
