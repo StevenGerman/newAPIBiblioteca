@@ -43,8 +43,18 @@ function handleGetRequest($pdo) {
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        header("HTTP/1.1 200 OK");
-        echo json_encode($stmt->fetchAll());
+        
+        $datos = $stmt->fetchAll();
+        
+
+        if($datos){
+            header("HTTP/1.1 200 OK");
+            echo json_encode($datos);
+        }else{
+            //Error en el servidor
+            header("HTTP/1.1 500 Internal Server Error");
+            echo json_encode(array("error" => "Error en la base de datos"));
+        } 
     
     exit;
 }
