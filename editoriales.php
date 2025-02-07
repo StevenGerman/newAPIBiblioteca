@@ -17,10 +17,10 @@ $pdo = new Conexion();
 // Maneja la solicitud según el método HTTP
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
-        handleGetRequest($pdo);
+        getRequest($pdo);
         break;
     case 'POST':
-        handlePostRequest($pdo);
+        postRequest($pdo);
         break;
     case 'PUT':
         handlePutRequest($pdo);
@@ -38,7 +38,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 }
 
 // Maneja solicitudes GET
-function handleGetRequest($pdo) {
+function GetRequest($pdo) {
         $sql = "SELECT * FROM editoriales";
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
@@ -57,6 +57,25 @@ function handleGetRequest($pdo) {
         } 
     
     exit;
+}
+function postRequest($pdo){
+    $data = json_decode(file_get_contents('php://input'));
+
+    $sql = "INSERT INTO editoriales (ediNombre,ediDireccion,ediTelefono,ediEmail) values ((:ediNombre),(:ediDireccion),(:ediTelefono),(:ediEmail));";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':ediNombre', $data->ediNombre);
+    $stmt->bindParam(':ediDireccion', $data->ediDireccion);
+    $stmt->bindParam(':ediTelefono', $data->ediTelefono);
+    $stmt->bindParam(':ediEmail', $data->ediEmail);
+
+    if($stmt->execute()){
+        $idPost = $pdo->lastInsertId();
+        header("HTTP/1.1 201 Created");
+        echo json_encode($idPost);
+    }else{
+        header("HTTP/1.1 500 Error Server");
+        echo json_encode(['error' => 'No se pudo crear la editorial']);
+    }
 }
 
 
