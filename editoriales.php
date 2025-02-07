@@ -26,7 +26,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         handlePutRequest($pdo);
         break;
     case 'DELETE':
-        handleDeleteRequest($pdo);
+        deleteRequest($pdo);
         break;
     case 'OPTIONS':
         // Maneja las solicitudes preflight
@@ -76,6 +76,29 @@ function postRequest($pdo){
         header("HTTP/1.1 500 Error Server");
         echo json_encode(['error' => 'No se pudo crear la editorial']);
     }
+}
+
+function deleteRequest($pdo){
+    
+    $idEditorial = $_GET['idEditorial'];
+
+    if(isset($_GET['idEditorial'])){
+        $sql = "DELETE FROM editoriales where idEditorial = :idEditorial";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam('idEditorial',$idEditorial);
+        if($stmt->execute()){
+            header("HTTP/1.1 200 OK");
+            echo json_encode(['message' => 'Eliminación exitosa']); // Retorna un mensaje de éxito
+        }else{
+            header("HTTP/1.1 500 Internal Server Error");
+            echo json_encode(['error' => 'No se pudo eliminar el editorial']);
+        }
+    }else {
+        header("HTTP/1.1 400 Bad Request");
+        echo json_encode(['error' => 'Entrada inválida']);
+    }
+    exit;
+
 }
 
 
