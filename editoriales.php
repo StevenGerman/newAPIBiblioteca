@@ -56,6 +56,15 @@ function GetRequest($pdo) {
             echo json_encode(array("error" => "Error en el servidor"));
         } 
         
+    }elseif(isset($_GET['ediNombre'])){
+        $perNombre = strtolower($_GET['ediNombre']);
+        $sql = $pdo->prepare("SELECT * FROM editoriales WHERE LOWER(ediNombre) LIKE :ediNombre");
+        $sql->bindValue(':ediNombre', '%' . $perNombre . '%', PDO::PARAM_STR);
+        $sql->execute();
+        $sql->setFetchMode(PDO::FETCH_ASSOC);
+        header("HTTP/1.1 200 OK");
+        echo json_encode($sql->fetchAll());
+
     }else{
         $sql = "SELECT * FROM editoriales";
         $stmt = $pdo->prepare($sql);
