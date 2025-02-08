@@ -39,6 +39,24 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 // Maneja solicitudes GET
 function GetRequest($pdo) {
+
+    if(isset($_GET['idEditorial'])){
+        $sql = "SELECT * FROM editoriales WHERE idEditorial=:idEditorial";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':idEditorial', $_GET['idEditorial']);
+        $stmt->execute();
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $datos= $stmt->fetchAll();
+        if($datos){
+            header("HTTP/1.1 200 OK");
+            echo json_encode($datos);
+        }else{
+            //Error en el servidor
+            header("HTTP/1.1 500 Internal Server Error");
+            echo json_encode(array("error" => "Error en el servidor"));
+        } 
+        
+    }else{
         $sql = "SELECT * FROM editoriales";
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
@@ -56,7 +74,12 @@ function GetRequest($pdo) {
             echo json_encode(array("error" => "Error en la base de datos"));
         } 
     
-    exit;
+        exit;
+
+    }
+
+
+        
 }
 function postRequest($pdo){
     $data = json_decode(file_get_contents('php://input'));
@@ -80,12 +103,12 @@ function postRequest($pdo){
 
 function deleteRequest($pdo){
     
-    $idEditorial = $_GET['idEditorial'];
+    
 
     if(isset($_GET['idEditorial'])){
-        $sql = "DELETE FROM editoriales where idEditorial = :idEditorial";
+        $sql = "DELETE FROM editoriales WHERE idEditorial = :idEditorial";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindParam('idEditorial',$idEditorial);
+        $stmt->bindParam(':idEditorial',$_GET['idEditorial']);
         if($stmt->execute()){
             header("HTTP/1.1 200 OK");
             echo json_encode(['message' => 'Eliminación exitosa']); // Retorna un mensaje de éxito
