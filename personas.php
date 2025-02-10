@@ -41,7 +41,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 }
 
 function getRequest($pdo){
-    $sql = $pdo->prepare("SELECT * FROM personas");
+    $sql = $pdo->prepare("SELECT p.idPersona, p.perNombre, p.perApellido, p.perDni,p.perContrasena,r.idRol,r.rolNombre FROM personas as p INNER JOIN roles as r ON p.rolID = r.idRol");
         $sql->execute();
         $sql->setFetchMode(PDO::FETCH_ASSOC);
         header("HTTP/1.1 200 OK");
