@@ -36,7 +36,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 }
 
 function getRequest($pdo){
-    $sql = $pdo->prepare("SELECT l.idLibro,l.libTitulo,l.libTitulo,l.libNotaDeContenido,e.idEditorial,e.ediNombre,m.idMateria,m.matNombre,a.idAutor,a.autNombre,a.autApellido FROM libros as l INNER JOIN editoriales as e ON l.idLibro = e.idEditorial INNER JOIN materias AS m ON l.materiaID = m.idMateria INNER JOIN autores as a on l.autorID = a.idAutor");
+    $sql = $pdo->prepare("SELECT l.idLibro,l.libTitulo,l.libAnio,l.libNotaDeContenido,e.idEditorial,e.ediNombre,m.idMateria,m.matNombre,a.idAutor,a.autNombre,a.autApellido FROM libros as l INNER JOIN editoriales as e ON l.idLibro = e.idEditorial INNER JOIN materias AS m ON l.materiaID = m.idMateria INNER JOIN autores as a on l.autorID = a.idAutor");
         $sql->execute();
         $sql->setFetchMode(PDO::FETCH_ASSOC);
         header("HTTP/1.1 200 OK");
