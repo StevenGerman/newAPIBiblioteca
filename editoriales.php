@@ -23,7 +23,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         postRequest($pdo);
         break;
     case 'PUT':
-        handlePutRequest($pdo);
+        putRequest($pdo);
         break;
     case 'DELETE':
         deleteRequest($pdo);
@@ -90,6 +90,42 @@ function GetRequest($pdo) {
 
         
 }
+
+function putRequest($pdo){
+    $data = json_decode(file_get_contents('php://input'));
+
+    if(isset($data->idEditorial)){
+        $sql = "UPDATE editoriales SET ediNombre = :ediNombre, ediDireccion = :ediDireccion, 
+        ediTelefono = :ediTelefono, ediEmail = :ediEmail WHERE idEditorial = :idEditorial";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':ediNombre', $data->ediNombre);
+        $stmt->bindParam(':ediDireccion', $data->ediDireccion);
+        $stmt->bindParam(':ediTelefono', $data->ediTelefono);
+        $stmt->bindParam(':ediEmail', $data->ediEmail);
+        $stmt->bindParam(':idEditorial', $data->idEditorial);
+        
+        if($stmt->execute()){
+            header("HTTP/1.1 200 OK");
+            echo json_encode(['message' => 'Actualización exitosa']);
+        }else{
+            header("HTTP/1.1 500 Server Error");
+            echo json_encode(['message' => 'Error en servidor']);
+        }
+    }else{
+        header("HTTP/1.1 405 Bad Request");
+            echo json_encode(['message' => 'Error en la consulta']);
+
+    }
+    exit;
+
+    
+
+
+
+
+}
+
+
 function postRequest($pdo){
     $data = json_decode(file_get_contents('php://input'));
 
