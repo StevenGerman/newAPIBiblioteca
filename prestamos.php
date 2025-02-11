@@ -28,7 +28,7 @@ switch($_SERVER["REQUEST_METHOD"]){
 }
 
 function getRequest($pdo){
-    $sql = "LECT p.idPrestamo,p.presFechaDev,p.presFechaSal,p.presObservacion,p.personaID,p.libroID, personas.perNombre, personas.perApellido,l.libTitulo FROM prestamos as p INNER JOIN personas on p.personaID = personas.idPersona INNER JOIN libros as l ON p.libroID = l.idLibro;";
+    $sql = "SELECT p.idPrestamo,p.presFechaDev,p.presFechaSal,p.presObservacion,p.personaID,p.libroID, personas.perNombre, personas.perApellido,l.libTitulo FROM prestamos as p INNER JOIN personas on p.personaID = personas.idPersona INNER JOIN libros as l ON p.libroID = l.idLibro";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $stmt->setFetchMode(PDO::FETCH_ASSOC);
