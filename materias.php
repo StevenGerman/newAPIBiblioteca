@@ -50,7 +50,7 @@ function getRequest($pdo){
 function postRequest($pdo){
     $data = json_decode(file_get_contents('php://input'));
 
-    $sql = "INSERT INTO materias (matNombre) values :ediNombre";
+    $sql = "INSERT INTO materias (matNombre) values :matNombre";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':matNombre', $data->matNombre);
 
