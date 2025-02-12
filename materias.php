@@ -38,12 +38,38 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 
 function getRequest($pdo){
-    $sql = "SELECT * FROM materias";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
-    $stmt->setFetchMode(PDO::FETCH_ASSOC);
-    header("HTTP/1.1 200 OK");
-    echo json_encode($stmt->fetchAll());
+    
+    if($_GET['idMateria']){
+        $sql = "SELECT * FROM materias WHERE idMateria = :idMateria";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':idMateria', $_GET['idMateria']);
+        $stmt->execute();
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $datos = $stmt->fetchAll();
+        if($datos){
+            header("HTTP/1.1 200 OK");
+            echo json_encode($datos);
+        }else{
+            header("HTTP/1.1 500 Internal Server Error");
+            echo json_encode(array("error" => "Error en el servidor"));
+        }
+    }else{
+        $sql = "SELECT * FROM materias";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $datos = $stmt->fetchAll();
+        if($datos){
+            header("HTTP/1.1 200 OK");
+            echo json_encode($datos);
+        }else{
+            header("HTTP/1.1 500 Internal Server Error");
+            echo json_encode(array("error" => "Error en el servidor"));
+        }
+    }
+
+
+    
 }
 
 
@@ -59,8 +85,8 @@ function postRequest($pdo){
         header("HTTP/1.1 201 Created");
         echo json_encode($idPost);
     }else{
-        header("HTTP/1.1 500 Internal Server Error"); // More appropriate status code
-        $errorInfo = $stmt->errorInfo(); // Get detailed error information
+        header("HTTP/1.1 500 Internal Server Error"); 
+        $errorInfo = $stmt->errorInfo(); 
         echo json_encode(['error' => 'No se pudo crear la materia', 'details' => $errorInfo]); // Include details for debugging
     }
 }

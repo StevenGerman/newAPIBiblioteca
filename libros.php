@@ -36,11 +36,30 @@ switch ($_SERVER['REQUEST_METHOD']) {
 }
 
 function getRequest($pdo){
-    $sql = $pdo->prepare("SELECT l.idLibro,l.libTitulo,l.libAnio,l.libNotaDeContenido,e.idEditorial,e.ediNombre,m.idMateria,m.matNombre,a.idAutor,a.autNombre,a.autApellido FROM libros as l INNER JOIN editoriales as e ON l.idLibro = e.idEditorial INNER JOIN materias AS m ON l.materiaID = m.idMateria INNER JOIN autores as a on l.autorID = a.idAutor");
+    if(isset($_GET['idLibro'])){
+        $sql = "SELECT * FROM libros WHERE idLibro = :idLibro";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':idLibro',$_GET['idLibro']);
+        $stmt->execute();
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $datos = $stmt->fetchAll();
+        if($datos){
+            header("HTTP/1.1 200 OK");
+            echo json_encode($datos);
+        }else{
+            header("HTTP/1.1 500 Internal Server Error");
+            echo json_encode(array("error" => "Error en el servidor"));
+        }
+        
+        
+    }else{
+        $sql = $pdo->prepare("SELECT l.idLibro,l.libTitulo,l.libAnio,l.libNotaDeContenido,e.idEditorial,e.ediNombre,m.idMateria,m.matNombre,a.idAutor,a.autNombre,a.autApellido FROM libros as l INNER JOIN editoriales as e ON l.idLibro = e.idEditorial INNER JOIN materias AS m ON l.materiaID = m.idMateria INNER JOIN autores as a on l.autorID = a.idAutor");
         $sql->execute();
         $sql->setFetchMode(PDO::FETCH_ASSOC);
         header("HTTP/1.1 200 OK");
         echo json_encode($sql->fetchAll());
+    }
+    
     exit;
 }
 
