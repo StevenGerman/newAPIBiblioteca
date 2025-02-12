@@ -36,6 +36,17 @@ switch ($_SERVER['REQUEST_METHOD']) {
         break;
 }
 
+
+function getRequest($pdo){
+    $sql = "SELECT * FROM materias";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $stmt->setFetchMode(PDO::FETCH_ASSOC);
+    header("HTTP/1.1 200 OK");
+    echo json_encode($stmt->fetchAll());
+}
+
+
 function postRequest($pdo){
     $data = json_decode(file_get_contents('php://input'));
 
