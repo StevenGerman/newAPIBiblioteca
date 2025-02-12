@@ -14,7 +14,7 @@ include 'conexion.php';
 $pdo = new Conexion();
 
 
-switch($_SERVER['REQUEST_METHOD']){
+switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
         getRequest($pdo);
         break;
@@ -27,33 +27,31 @@ switch($_SERVER['REQUEST_METHOD']){
     case 'DELETE':
         deleteRequest($pdo);
         break;
+    case 'OPTIONS':
+        // Maneja las solicitudes preflight
+        header("HTTP/1.1 200 OK");
+        break;
     default:
         header("HTTP/1.1 405 Method Not Allowed");
         break;
 }
 
-function getRequest($pdo){
+function postRequest($pdo){
+    $data = json_decode(file_get_contents('php://input'));
 
-    $sql = "SELECT * FROM materias";
+    $sql = "INSERT INTO materias (matNombre) values :ediNombre";
     $stmt = $pdo->prepare($sql);
-    $stmt -> execute();
-    $stmt-> setFetchMode(PDO::FETCH_ASSOC);
-    $datos = $stmt->fetchAll();
-    
-    
+    $stmt->bindParam(':matNombre', $data->matNombre);
 
-    if($datos){
-        header("HTTP/1.1 200 OK");
-        echo json_encode($datos);
+    if($stmt->execute()){
+        $idPost = $pdo->lastInsertId();
+        header("HTTP/1.1 201 Created");
+        echo json_encode($idPost);
     }else{
-        header("HTTP/1.1 500 Internal Server Error");
-        echo json_encode(array("error" => "Error en el servidor"));
+        header("HTTP/1.1 500 Error Server");
+        echo json_encode(['error' => 'No se pudo crear la editorial']);
     }
-
-
-    exit;
 }
-
 
 
 ?>
