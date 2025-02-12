@@ -50,19 +50,49 @@ function getRequest($pdo){
 function postRequest($pdo){
     $data = json_decode(file_get_contents('php://input'));
 
-    $sql = "INSERT INTO `materias`(`idMateria`, `matNombre`) VALUES (DEFAULT,':matNombre')";
+    $sql = "INSERT INTO materias (matNombre) VALUES (:matNombre)"; // Corrected SQL
     $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':matNombre', $data->matNombre);
+    $stmt->bindParam(':matNombre', $data->matNombre); // Correct binding
 
     if($stmt->execute()){
         $idPost = $pdo->lastInsertId();
         header("HTTP/1.1 201 Created");
         echo json_encode($idPost);
     }else{
-        header("HTTP/1.1 500 Error Server");
-        echo json_encode(['error' => 'No se pudo crear la editorial']);
+        header("HTTP/1.1 500 Internal Server Error"); // More appropriate status code
+        $errorInfo = $stmt->errorInfo(); // Get detailed error information
+        echo json_encode(['error' => 'No se pudo crear la materia', 'details' => $errorInfo]); // Include details for debugging
     }
 }
+
+function deleteRequest($pdo){
+    
+    
+
+    if(isset($_GET['idMateria'])){
+        $sql = "DELETE FROM materias WHERE idMateria = :idMateria";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':idMateria',$_GET['idMateria']);
+        if($stmt->execute()){
+            header("HTTP/1.1 200 OK");
+            echo json_encode(['message' => 'Eliminación exitosa']); // Retorna un mensaje de éxito
+        }else{
+            header("HTTP/1.1 500 Internal Server Error");
+            echo json_encode(['error' => 'No se pudo eliminar el editorial']);
+        }
+    }else {
+        header("HTTP/1.1 400 Bad Request");
+        echo json_encode(['error' => 'Entrada inválida']);
+    }
+    exit;
+
+}
+
+
+
+
+
+
 
 
 ?>
