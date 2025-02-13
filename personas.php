@@ -40,12 +40,34 @@ switch ($_SERVER['REQUEST_METHOD']) {
         break;
 }
 
-function getRequest($pdo){
-    $sql = $pdo->prepare("SELECT p.idPersona, p.perNombre, p.perApellido, p.perDni,p.perContrasena,r.idRol,r.rolNombre FROM personas as p INNER JOIN roles as r ON p.rolID = r.idRol");
+function handleGetRequest($pdo) {
+    // Si se proporciona el parámetro 'idPersona', busca por ID
+    if (isset($_GET['idPersona'])) {
+        $sql = $pdo->prepare("SELECT * FROM Personas WHERE idPersona=:idPersona");
+        $sql->bindValue(':idPersona', $_GET['idPersona']);
         $sql->execute();
         $sql->setFetchMode(PDO::FETCH_ASSOC);
         header("HTTP/1.1 200 OK");
         echo json_encode($sql->fetchAll());
+    }
+    // Si se proporciona el parámetro 'perNombre', busca por nombre
+    elseif (isset($_GET['perNombre'])) {
+        $perNombre = strtolower($_GET['perNombre']);
+        $sql = $pdo->prepare("SELECT * FROM Personas WHERE LOWER(perNombre) LIKE :perNombre");
+        $sql->bindValue(':perNombre', '%' . $perNombre . '%', PDO::PARAM_STR);
+        $sql->execute();
+        $sql->setFetchMode(PDO::FETCH_ASSOC);
+        header("HTTP/1.1 200 OK");
+        echo json_encode($sql->fetchAll());
+    }
+    // Si no se proporciona ningún parámetro, obtiene todos las personas
+    else {
+        $sql = $pdo->prepare("SELECT p.idPersona, p.perNombre, p.perApellido, p.perDni,p.perContrasena,r.idRol,r.rolNombre FROM personas as p INNER JOIN roles as r ON p.rolID = r.idRol");
+        $sql->execute();
+        $sql->setFetchMode(PDO::FETCH_ASSOC);
+        header("HTTP/1.1 200 OK");
+        echo json_encode($sql->fetchAll());
+    }
     exit;
 }
 
