@@ -40,7 +40,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         break;
 }
 
-function handleGetRequest($pdo) {
+function getRequest($pdo) {
     // Si se proporciona el parámetro 'idPersona', busca por ID
     if (isset($_GET['idPersona'])) {
         $sql = $pdo->prepare("SELECT * FROM Personas WHERE idPersona=:idPersona");
