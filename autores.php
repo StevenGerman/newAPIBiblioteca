@@ -87,7 +87,12 @@ function postRequest($pdo){
             header("HTTP/1.1 500 Error Server");
             echo json_encode(['error' => 'No se pudo crear la editorial']);
         }
+    }else{
+        header("HTTP/1.1 405 Bad Request");
+            echo json_encode(['message' => 'Error en la consulta']);
+
     }
+    exit;
 
 }
 function putRequest($pdo){
