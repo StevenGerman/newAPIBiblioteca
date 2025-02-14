@@ -34,7 +34,7 @@ switch($_SERVER['REQUEST_METHOD']){
 
 function getRequest($pdo){
     
-    if($_GET['idAutor']){
+    if(isset($_GET['idAutor'])){
         $sql = "SELECT * FROM autores WHERE idAutor = :idAutor";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam('idAutor',$_GET['idAutor']);
