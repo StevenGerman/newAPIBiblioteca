@@ -76,20 +76,30 @@ function registerUser($pdo) {
                 exit;
             }
            
-            $rol = 2;
+            $rol = 1;
             // Insertar nuevo Usuario
-            $sql = $pdo->prepare("INSERT INTO personas (perNombre, perApellido, perDni, perContrasena, rolID) 
-                                  VALUES (:perNombre, :perApellido, :perMail, :perDni, :perContrasena, :rolID)");
-            $sql->bindParam(':perNombre', $perNombre);
-            $sql->bindParam(':perApellido', $perApellido);
-            $sql->bindParam(':perDni', $perDni);
-            $sql->bindParam(':perContrasena', $hashedPassword);
-            $sql->bindParam(':rolID', $rol);
-            $sql->execute();
+            $sql = "INSERT INTO personas (perNombre, perApellido, perDni, perContrasena, rolID) 
+                                  VALUES (:perNombre, :perApellido, :perDni, :perContrasena, :rolID)";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':perNombre', $perNombre);
+            $stmt->bindParam(':perApellido', $perApellido);
+            $stmt->bindParam(':perDni', $perDni);
+            $stmt->bindParam(':perContrasena', $hashedPassword);
+            $stmt->bindParam(':rolID', $rol);
+
+
+            if($stmt->execute()){
+                header("HTTP/1.1 201 Created");
+                echo json_encode(array("message" => "Usuario creado exitosamente"));
+            }else{
+                header("HTTP/1.1 500 Error Server");
+                echo json_encode(array("message" => "Error Server"));
+            }
+            
             //error_log("User inserted successfully");
 
-            header("HTTP/1.1 201 Created");
-            echo json_encode(array("message" => "Usuario creado exitosamente"));
+            
         } else {
             //error_log("Missing fields in request");
             header("HTTP/1.1 400 Bad Request");
