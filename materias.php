@@ -39,7 +39,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 function getRequest($pdo){
     
-    if($_GET['idMateria']){
+    if(isset($_GET['idMateria'])){
         $sql = "SELECT * FROM materias WHERE idMateria = :idMateria";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':idMateria', $_GET['idMateria']);
