@@ -62,7 +62,7 @@ function registerUser($pdo) {
             //error_log("Password hashed");
 
             // Verificar si el DNI ya existe
-            $checkUser = $pdo->prepare("SELECT * FROM Personas WHERE perDni = :perDni");
+            $checkUser = $pdo->prepare("SELECT * FROM personas WHERE perDni = :perDni");
             $checkUser->bindParam(':perDni', $perDni);
             $checkUser->execute();
             //error_log("Email checked");
@@ -78,7 +78,7 @@ function registerUser($pdo) {
            
             $rol = 2;
             // Insertar nuevo Usuario
-            $sql = $pdo->prepare("INSERT INTO Personas (perNombre, perApellido, perDni, perContrasena, rolID) 
+            $sql = $pdo->prepare("INSERT INTO personas (perNombre, perApellido, perDni, perContrasena, rolID) 
                                   VALUES (:perNombre, :perApellido, :perMail, :perDni, :perContrasena, :rolID)");
             $sql->bindParam(':perNombre', $perNombre);
             $sql->bindParam(':perApellido', $perApellido);
