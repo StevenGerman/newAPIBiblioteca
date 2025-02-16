@@ -1,13 +1,16 @@
 <?php
+
+// Habilita el acceso desde cualquier origen
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: access");
-header("Access-Control-Allow-Methods: GET,POST,OPTIONS");
+// Habilita los métodos HTTP permitidos
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+// Establece el tipo de contenido de la respuesta como JSON
 header("Content-Type: application/json; charset=UTF-8");
+// Habilita las cabeceras permitidas
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
 
-include 'conexionBD.php';
+include 'conexion.php';
 
 $pdo = new Conexion();
 
