@@ -45,8 +45,7 @@ function registerUser($pdo) {
             isset($data['perNombre']) &&
             isset($data['perApellido']) &&
             isset($data['perDni']) &&
-            isset($data['perContrasena']) &&
-            isset($data['rolID'])
+            isset($data['perContrasena'])
             
             
         ) {
