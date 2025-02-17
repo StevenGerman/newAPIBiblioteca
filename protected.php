@@ -5,7 +5,7 @@ header("Access-Control-Allow-Methods: GET");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
-include 'conexionBD.php';
+include 'conexion.php';
 require 'auth.php';
 require 'vendor/autoload.php'; // Autoload de Composer para JWT
 
