@@ -6,7 +6,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
-include 'conexionBD.php';
+include 'conexion.php';
 require 'auth.php';
 require 'vendor/autoload.php'; // Autoload de Composer para JWT
 
@@ -54,10 +54,11 @@ function loginUser($pdo, $auth)
     if (isset($data['perDni']) && isset($data['perContrasena'])) {
         $perDni = $data['perDni'];
         $perContrasena = $data['perContrasena'];
+        print_r($perDni);
 
         try {
             //Verificar si el usuario existe
-            $stmt = $pdo->prepare("SELECT p.idPersona ,p.perDni,p.perContrasena, r.rolNombre FROM Personas p INNER JOIN Roles r ON p.rolID = r.idRol WHERE p.perDni = :perDni");
+            $stmt = $pdo->prepare("SELECT p.idPersona ,p.perDni,p.perContrasena, r.rolNombre FROM personas p INNER JOIN roles r ON p.rolID = r.idRol WHERE p.perDni = :perDni");
             $stmt->bindParam(':perDni', $perDni);
             $stmt->execute();
 
