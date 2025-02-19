@@ -21,7 +21,7 @@ $dotenv->load();
 $pdo = new Conexion();
 $auth = new Authentication($key);
 
-$ruta = "/APIescuela/login.php";
+$ruta = "/newAPIBiblioteca/login.php";
 
 //Verificar si el metodo HTTP es POST para iniciar sesion
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
