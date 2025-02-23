@@ -41,19 +41,24 @@ if(isset($_SERVER['REQUEST_METHOD']) == 'GET'){
             $payload = [
             'iat' => $now,
             'exp' => $now + 3600,
-            'data' => [$datos[0]['perDni'],$datos[0]['idRol'],$datos[0]['rolNombre']]
+            'data' => [
+                'idPersona' => $datos[0]['idPersona'],
+                'idRol' => $datos[0]['idRol'],
+                'rolNombre' => $datos[0]['rolNombre']
+            ]
                 
             
             
             ];
 
-            $jwt = JWT::encode($payload, $key, 'HS256');    
-            try {
+            $jwt = JWT::encode($payload, $key, 'HS256');  
+            print_r($jwt);  
+            /*try {
                 $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
-                print_r($jwt);
+                
             } catch (Exception $e) {
                 echo 'An error occurred: ' . $e->getMessage();
-            }
+            }*/
 
 
         }else{

@@ -18,6 +18,8 @@ use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
 
 
+
+
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
         getRequest($pdo);
@@ -43,18 +45,57 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 function getToken(){
     $headers = apache_request_headers();
+    if(!isset($headers['Authorization'])){
+        http_response_code(403);
+        echo json_encode(array("error" => "Token invalid"));
+        return;
+    }
     $authorization = $headers['Authorization'];
     $authorization = explode(' ', $authorization);
     $token = $authorization[1];
-    $decodeToken = JWT::decode($token, new Key('example_key', 'HS256'));
-    return $decodeToken;
+
+    try{
+        return JWT::decode($token, new Key('example_key', 'HS256'));
+
+    }catch(Exception $e){
+        http_response_code(403);
+        echo json_encode(array("error" => "Expired Token"));
+        return;
+    }
+
+    
 }
 
+function validateToken($pdo){
+    $info = getToken();
+    if($info == null){
+        return;
+    }else{
+        $sql = "SELECT * FROM personas WHERE idPersona = :idPersona";
+        $stmt = $pdo->prepare($sql);
+        $idPersona = $info->data->idPersona;
+        //echo json_encode($info->data->idPersona);
+        $stmt->bindParam(':idPersona', $idPersona);
+        $stmt -> execute();
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $dataValidada = $stmt->fetch();
+        if($dataValidada == null){
+            return false;
+        }
+        return $dataValidada['idPersona'];
+    }
+    
+    
+}
+
+
 function getRequest($pdo){
-
-
-    
-    
+    if(!validateToken($pdo)){
+        http_response_code(403);
+        echo json_encode(array("error" => "Unauthorized"));
+        return;
+    }
+  
     if(isset($_GET['idMateria'])){
         $sql = "SELECT * FROM materias WHERE idMateria = :idMateria";
         $stmt = $pdo->prepare($sql);
@@ -75,21 +116,18 @@ function getRequest($pdo){
         $stmt->execute();
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $datos = $stmt->fetchAll();
-        $headers = getToken();
+        $validate = validateToken($pdo);
         if($datos){
             header("HTTP/1.1 200 OK");
             echo json_encode([
-                "datos" => $datos,
-                "headers" => $headers,
+                "datos" => $datos
             ]);
         }else{
             header("HTTP/1.1 500 Internal Server Error");
             echo json_encode(array("error" => "Error en el servidor"));
         }
     }
-
-
-    
+ 
 }
 
 
@@ -112,8 +150,6 @@ function postRequest($pdo){
 }
 
 function deleteRequest($pdo){
-    
-    
 
     if(isset($_GET['idMateria'])){
         $sql = "DELETE FROM materias WHERE idMateria = :idMateria";
