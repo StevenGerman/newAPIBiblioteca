@@ -7,6 +7,11 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 
 require __DIR__ . '/vendor/autoload.php';
 
+require 'conexion.php';
+
+$pdo = new Conexion();
+
+
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
 
@@ -14,20 +19,50 @@ use \Firebase\JWT\Key;
 
 if(isset($_SERVER['REQUEST_METHOD']) == 'GET'){
 
-    $now = time();
-    $key = 'example_key';
-    $payload = [
-    'iat' => $now,
-    'exp' => $now + 3600,
-    'data' => '1',
+    $perDni = $_GET['perDni'];
+    $perContrasena = $_GET['perContrasena'];
     
-    ];
 
-    $jwt = JWT::encode($payload, $key, 'HS256');    
-    try {
-        $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
-        print_r($decoded);
-    } catch (Exception $e) {
-        echo 'An error occurred: ' . $e->getMessage();
-    }
+    $sql = $pdo->prepare("SELECT p.idPersona, p.perDni,p.perContrasena,r.idRol,r.rolNombre FROM personas as p INNER JOIN roles as r ON p.rolID = r.idRol WHERE p.perDni = :perDni && p.perContrasena = :perContrasena");
+        
+        $sql->bindValue(':perDni', $perDni);
+        $sql->bindValue(':perContrasena', $perContrasena);
+        $sql->execute();
+        $sql->setFetchMode(PDO::FETCH_ASSOC);
+        header("HTTP/1.1 200 OK");
+        $datos = $sql->fetchAll();
+
+        if(!empty($datos)){
+            
+            echo json_encode($datos);
+
+            $now = time();
+            $key = 'example_key';
+            $payload = [
+            'iat' => $now,
+            'exp' => $now + 3600,
+            'data' => [$datos[0]['perDni'],$datos[0]['idRol'],$datos[0]['rolNombre']]
+                
+            
+            
+            ];
+
+            $jwt = JWT::encode($payload, $key, 'HS256');    
+            try {
+                $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
+                print_r($decoded);
+            } catch (Exception $e) {
+                echo 'An error occurred: ' . $e->getMessage();
+            }
+
+
+        }else{
+            echo 'Credenciales invalidas';
+        }
+
+
+        
+
+
+    
 }
