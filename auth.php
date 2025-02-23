@@ -50,7 +50,7 @@ if(isset($_SERVER['REQUEST_METHOD']) == 'GET'){
             $jwt = JWT::encode($payload, $key, 'HS256');    
             try {
                 $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
-                print_r($decoded);
+                print_r($jwt);
             } catch (Exception $e) {
                 echo 'An error occurred: ' . $e->getMessage();
             }

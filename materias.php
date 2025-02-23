@@ -11,7 +11,11 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 
 include 'conexion.php';
 
+require __DIR__ . '/vendor/autoload.php';
 $pdo = new Conexion();
+
+use \Firebase\JWT\JWT;
+use \Firebase\JWT\Key;
 
 
 switch ($_SERVER['REQUEST_METHOD']) {
@@ -37,7 +41,19 @@ switch ($_SERVER['REQUEST_METHOD']) {
 }
 
 
+function getToken(){
+    $headers = apache_request_headers();
+    $authorization = $headers['Authorization'];
+    $authorization = explode(' ', $authorization);
+    $token = $authorization[1];
+    $decodeToken = JWT::decode($token, new Key('example_key', 'HS256'));
+    return $decodeToken;
+}
+
 function getRequest($pdo){
+
+
+    
     
     if(isset($_GET['idMateria'])){
         $sql = "SELECT * FROM materias WHERE idMateria = :idMateria";
@@ -59,9 +75,13 @@ function getRequest($pdo){
         $stmt->execute();
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $datos = $stmt->fetchAll();
+        $headers = getToken();
         if($datos){
             header("HTTP/1.1 200 OK");
-            echo json_encode($datos);
+            echo json_encode([
+                "datos" => $datos,
+                "headers" => $headers,
+            ]);
         }else{
             header("HTTP/1.1 500 Internal Server Error");
             echo json_encode(array("error" => "Error en el servidor"));

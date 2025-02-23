@@ -38,6 +38,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
 }
 
 // Maneja solicitudes GET
+
+
 function GetRequest($pdo) {
 
     if(isset($_GET['idEditorial'])){
