@@ -47,7 +47,7 @@ function getToken(){
     $headers = apache_request_headers();
     if(!isset($headers['Authorization'])){
         http_response_code(403);
-        echo json_encode(array("error" => "Token invalid"));
+        echo json_encode(array("error" => "Unauthentizaded request"));
         return;
     }
     $authorization = $headers['Authorization'];
@@ -132,6 +132,11 @@ function getRequest($pdo){
 
 
 function postRequest($pdo){
+    if(!validateToken($pdo)){
+        http_response_code(403);
+        echo json_encode(array("error" => "Unauthorized"));
+        return;
+    }
     $data = json_decode(file_get_contents('php://input'));
 
     $sql = "INSERT INTO materias (matNombre) VALUES (:matNombre)"; // Corrected SQL
