@@ -14,12 +14,6 @@ include 'conexion.php';
 require __DIR__ . '/vendor/autoload.php';
 $pdo = new Conexion();
 
-require 'auth.php';
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
-$key = $_ENV['SECRET_KEY']; 
-$auth = new Autorization($key);
-
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
 
@@ -28,10 +22,10 @@ use \Firebase\JWT\Key;
 
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
-        getRequest($pdo,$auth);
+        getRequest($pdo);
         break;
     case 'POST':
-        postRequest($pdo,$auth);
+        postRequest($pdo);
         break;
     case 'PUT':
         putRequest($pdo);
@@ -49,7 +43,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 }
 
 
-function getToken($key){
+function getToken(){
     $headers = apache_request_headers();
     if(!isset($headers['Authorization'])){
         http_response_code(403);
@@ -61,7 +55,7 @@ function getToken($key){
     $token = $authorization[1];
 
     try{
-        return JWT::decode($token, new Key($key, 'HS256'));
+        return JWT::decode($token, new Key('example_key', 'HS256'));
 
     }catch(Exception $e){
         http_response_code(403);
@@ -72,8 +66,8 @@ function getToken($key){
     
 }
 
-function validateToken($pdo,$key){
-    $info = getToken($key);
+function validateToken($pdo){
+    $info = getToken();
     if($info == null){
         return;
     }else{
@@ -95,8 +89,8 @@ function validateToken($pdo,$key){
 }
 
 
-function getRequest($pdo,$auth){
-    if($auth->validateToken($pdo)){
+function getRequest($pdo){
+    if(!validateToken($pdo)){
         http_response_code(403);
         echo json_encode(array("error" => "Unauthorized"));
         return;
@@ -137,13 +131,12 @@ function getRequest($pdo,$auth){
 }
 
 
-function postRequest($pdo,$auth){
-    if(!$auth->validateToken($pdo)){
+function postRequest($pdo){
+    if(!validateToken($pdo)){
         http_response_code(403);
         echo json_encode(array("error" => "Unauthorized"));
         return;
     }
-    
     $data = json_decode(file_get_contents('php://input'));
 
     $sql = "INSERT INTO materias (matNombre) VALUES (:matNombre)"; // Corrected SQL
