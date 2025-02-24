@@ -13,7 +13,7 @@ $pdo = new Conexion();
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 $key = $_ENV['SECRET_KEY']; 
-$auth = new Authentication($key);
+//$auth = new Authentication($key);
 
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
@@ -78,10 +78,11 @@ function validateToken($pdo,$key){
 
 if(isset($_SERVER['REQUEST_METHOD']) == 'POST'){
 
-    $perDni = $_GET['perDni'];
-    echo $perDni;
-    $perContrasena = $_GET['perContrasena'];
-    
+    $data = json_decode(file_get_contents('php://input'),true);
+
+    //echo json_encode($data);
+    $perDni = $data['perDni'];
+    $perContrasena = $data['perContrasena'];
 
     $sql = $pdo->prepare("SELECT p.idPersona, p.perDni,p.perContrasena,r.idRol,r.rolNombre FROM personas as p INNER JOIN roles as r ON p.rolID = r.idRol WHERE p.perDni = :perDni && p.perContrasena = :perContrasena");
         
@@ -94,7 +95,7 @@ if(isset($_SERVER['REQUEST_METHOD']) == 'POST'){
 
         if(!empty($datos)){
             
-            echo json_encode($datos);
+            //echo json_encode($datos);
 
             $now = time();
             $key = 'example_key';
@@ -112,13 +113,9 @@ if(isset($_SERVER['REQUEST_METHOD']) == 'POST'){
             ];
 
             $jwt = JWT::encode($payload, $key, 'HS256');  
+            //return $jwt;
             print_r($jwt);  
-            /*try {
-                $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
-                
-            } catch (Exception $e) {
-                echo 'An error occurred: ' . $e->getMessage();
-            }*/
+            
 
 
         }else{
