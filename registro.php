@@ -17,7 +17,7 @@ $pdo = new Conexion();
         // Verificar si el método HTTP es POST para registrar un nuevo usuario
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         //error_log("POST request received"); // Log para verificar que llegó la petición POST
-        registerUser($pdo);
+        registrarUsuario($pdo);
     } else {
         if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
             // Manejar solicitudes de preflight (CORS)
@@ -36,7 +36,7 @@ $pdo = new Conexion();
     echo json_encode(array("message" => "Ha ocurrido un error inesperado: " . $e->getMessage()));
     exit(); */
 
-function registerUser($pdo) {
+function registrarUsuario($pdo) {
 
         $data = json_decode(file_get_contents("php://input"), true);
         //error_log("Data received: " . json_encode($data)); // Log para mostrar los datos recibidos
@@ -46,8 +46,7 @@ function registerUser($pdo) {
             isset($data['perApellido']) &&
             isset($data['perDni']) &&
             isset($data['perContrasena'])
-            
-            
+                    
         ) {
             $perNombre = $data['perNombre'];
             $perApellido = $data['perApellido'];
@@ -55,21 +54,19 @@ function registerUser($pdo) {
             $perContrasena = $data['perContrasena'];
             
 
-            error_log("All fields set: perNombre=$perNombre, perApellido=$perApellido, perDni=$perDni");
+            //error_log("All fields set: perNombre=$perNombre, perApellido=$perApellido, perDni=$perDni");
 
             // Cifrar contraseña
-            $hashedPassword = password_hash($perContrasena, PASSWORD_BCRYPT);
+            //$hashedPassword = password_hash($perContrasena, PASSWORD_BCRYPT);
             //error_log("Password hashed");
 
             // Verificar si el DNI ya existe
-            $checkUser = $pdo->prepare("SELECT * FROM personas WHERE perDni = :perDni");
-            $checkUser->bindParam(':perDni', $perDni);
-            $checkUser->execute();
-            //error_log("Email checked");
+            $stmtUsuarioExistente = $pdo->prepare("SELECT idPersona FROM personas WHERE perDni = :perDni");
+            $stmtUsuarioExistente->bindParam(':perDni', $perDni);
+            $stmtUsuarioExistente->execute();
+            $IDusuario = $stmtUsuarioExistente->fetchColumn() ?? false;
 
-            // Si quieres activar la verificación de email repetido
-            
-            if ($checkUser->rowCount() > 0) {
+            if ($IDusuario) {
                 //error_log("Email already registered");
                 header("HTTP/1.1 400 Bad Request");
                 echo json_encode(array("message" => "El usuario ya está registrado."));
@@ -85,7 +82,7 @@ function registerUser($pdo) {
             $stmt->bindParam(':perNombre', $perNombre);
             $stmt->bindParam(':perApellido', $perApellido);
             $stmt->bindParam(':perDni', $perDni);
-            $stmt->bindParam(':perContrasena', $hashedPassword);
+            $stmt->bindParam(':perContrasena', $perContrasena);
             $stmt->bindParam(':rolID', $rol);
 
 
