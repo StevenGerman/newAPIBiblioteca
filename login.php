@@ -81,8 +81,14 @@ if(isset($_SERVER['REQUEST_METHOD']) == 'POST'){
     $data = json_decode(file_get_contents('php://input'),true);
 
     //echo json_encode($data);
-    $perDni = $data['perDni'];
-    $perContrasena = $data['perContrasena'];
+    if(isset($data['perDni']) && $data['perContrasena']){
+        $perDni = $data['perDni'];
+        $perContrasena = $data['perContrasena'];
+    }else{
+        echo 'Credenciales invalidas';
+        return;
+    }
+    
 
     $sql = $pdo->prepare("SELECT p.idPersona, p.perDni,p.perContrasena,r.idRol,r.rolNombre FROM personas as p INNER JOIN roles as r ON p.rolID = r.idRol WHERE p.perDni = :perDni && p.perContrasena = :perContrasena");
         
@@ -103,6 +109,7 @@ if(isset($_SERVER['REQUEST_METHOD']) == 'POST'){
             'iat' => $now,
             'exp' => $now + 3600,
             'data' => [
+                "isSuccess" => true,
                 'idPersona' => $datos[0]['idPersona'],
                 'idRol' => $datos[0]['idRol'],
                 'rolNombre' => $datos[0]['rolNombre']
@@ -119,7 +126,11 @@ if(isset($_SERVER['REQUEST_METHOD']) == 'POST'){
 
 
         }else{
-            echo 'Credenciales invalidas';
+            json_encode([
+                "isSuccess" => false,
+                "message" => 'Credenciales invalidas'
+            ]);
+            
         }
 
 
