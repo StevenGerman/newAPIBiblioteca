@@ -7,127 +7,109 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 
 require __DIR__ . '/vendor/autoload.php';
 
-require 'conexion.php';
+require_once 'conexion.php';
 
 $pdo = new Conexion();
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
-$key = $_ENV['SECRET_KEY']; 
-$auth = new Authentication($key);
+$key = $_ENV['SECRET_KEY'];
+
 
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
 
-class Autorization{
-    
+class Autorization
+{
+
     private $claveSecreta;
 
-    public function __construct($claveSecreta) {
+    public function __construct($claveSecreta)
+    {
         $this->claveSecreta = $claveSecreta; // Asigna la clave secreta correctamente
     }
-}
+
+    
 
 
-
-function getToken($key){
+function getToken()
+{
     $headers = apache_request_headers();
-    if(!isset($headers['Authorization'])){
+    if (!isset($headers['Authorization'])) {
         http_response_code(403);
         echo json_encode(array("error" => "Unauthentizaded request"));
-        return;
+        return null;
     }
     $authorization = $headers['Authorization'];
     $authorization = explode(' ', $authorization);
     $token = $authorization[1];
 
-    try{
-        return JWT::decode($token, new Key($key, 'HS256'));
+    try {
+        return JWT::decode($token, new Key($this->claveSecreta, 'HS256'));
 
-    }catch(Exception $e){
+    } catch (Exception $e) {
         http_response_code(403);
         echo json_encode(array("error" => "Expired Token"));
-        return;
+        return null;
     }
 
-    
+
 }
 
-function validateToken($pdo,$key){
-    $info = getToken($key);
-    if($info == null){
+function validateToken($pdo)
+{
+    $info = getToken();
+    if ($info == null) {
         return;
-    }else{
-        $sql = "SELECT * FROM personas WHERE idPersona = :idPersona";
+    } else {
+        $sql = "SELECT idPersona FROM personas WHERE idPersona = :idPersona";
         $stmt = $pdo->prepare($sql);
         $idPersona = $info->data->idPersona;
         //echo json_encode($info->data->idPersona);
         $stmt->bindParam(':idPersona', $idPersona);
-        $stmt -> execute();
+        $stmt->execute();
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        $dataValidada = $stmt->fetch();
-        if($dataValidada == null){
-            return false;
-        }
-        return $dataValidada['idPersona'];
+        return $stmt->fetchColumn() ?? false;
+        
     }
-    
-    
+
+
 }
 
+function generateToken($idPersona, $rolNombre)
+{
+    if (isset($idPersona) && isset($rolNombre)) {
 
 
-if(isset($_SERVER['REQUEST_METHOD']) == 'POST'){
-
-    $perDni = $_GET['perDni'];
-    echo $perDni;
-    $perContrasena = $_GET['perContrasena'];
-    
-
-    $sql = $pdo->prepare("SELECT p.idPersona, p.perDni,p.perContrasena,r.idRol,r.rolNombre FROM personas as p INNER JOIN roles as r ON p.rolID = r.idRol WHERE p.perDni = :perDni && p.perContrasena = :perContrasena");
-        
-        $sql->bindValue(':perDni', $perDni);
-        $sql->bindValue(':perContrasena', $perContrasena);
-        $sql->execute();
-        $sql->setFetchMode(PDO::FETCH_ASSOC);
-        header("HTTP/1.1 200 OK");
-        $datos = $sql->fetchAll();
-
-        if(!empty($datos)){
-            
-            echo json_encode($datos);
-
-            $now = time();
-            $key = 'example_key';
-            $payload = [
+        $now = time();
+        $payload = [
             'iat' => $now,
             'exp' => $now + 3600,
             'data' => [
-                'idPersona' => $datos[0]['idPersona'],
-                'idRol' => $datos[0]['idRol'],
-                'rolNombre' => $datos[0]['rolNombre']
+                'idPersona' => $idPersona,
+                'rolNombre' => $rolNombre
             ]
-                
-            
-            
-            ];
+        ];
 
-            $jwt = JWT::encode($payload, $key, 'HS256');  
-            print_r($jwt);  
-            /*try {
-                $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
-                
-            } catch (Exception $e) {
-                echo 'An error occurred: ' . $e->getMessage();
-            }*/
-
-
-        }else{
-            echo 'Credenciales invalidas';
-        }
-
-
+        return JWT::encode($payload, $this->claveSecreta, 'HS256');
         
-
-
+    }else{
+        return null;
+    }
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
