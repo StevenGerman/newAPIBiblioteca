@@ -78,9 +78,8 @@ function getRequest($pdo,$auth){
         $datos = $stmt->fetchAll();
         if($datos){
             header("HTTP/1.1 200 OK");
-            echo json_encode([
-                "datos" => $datos
-            ]);
+            echo json_encode($datos);
+        
         }else{
             header("HTTP/1.1 500 Internal Server Error");
             echo json_encode(array("error" => "Error en el servidor"));
