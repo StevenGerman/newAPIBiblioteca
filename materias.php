@@ -9,23 +9,29 @@ header("Content-Type: application/json; charset=UTF-8");
 // Habilita las cabeceras permitidas
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-include 'conexion.php';
+require_once 'conexion.php';
+
+require_once 'auth.php';
+
 
 require __DIR__ . '/vendor/autoload.php';
-$pdo = new Conexion();
 
-use \Firebase\JWT\JWT;
-use \Firebase\JWT\Key;
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+$key = $_ENV['SECRET_KEY']; 
+
+$pdo = new Conexion();
+$auth = new Autorization($key);
 
 
 
 
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
-        getRequest($pdo);
+        getRequest($pdo,$auth);
         break;
     case 'POST':
-        postRequest($pdo);
+        postRequest($pdo,$auth);
         break;
     case 'PUT':
         putRequest($pdo);
@@ -43,54 +49,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
 }
 
 
-function getToken(){
-    $headers = apache_request_headers();
-    if(!isset($headers['Authorization'])){
-        http_response_code(403);
-        echo json_encode(array("error" => "Unauthentizaded request"));
-        return;
-    }
-    $authorization = $headers['Authorization'];
-    $authorization = explode(' ', $authorization);
-    $token = $authorization[1];
-
-    try{
-        return JWT::decode($token, new Key('example_key', 'HS256'));
-
-    }catch(Exception $e){
-        http_response_code(403);
-        echo json_encode(array("error" => "Expired Token"));
-        return;
-    }
-
-    
-}
-
-function validateToken($pdo){
-    $info = getToken();
-    if($info == null){
-        return;
-    }else{
-        $sql = "SELECT * FROM personas WHERE idPersona = :idPersona";
-        $stmt = $pdo->prepare($sql);
-        $idPersona = $info->data->idPersona;
-        //echo json_encode($info->data->idPersona);
-        $stmt->bindParam(':idPersona', $idPersona);
-        $stmt -> execute();
-        $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        $dataValidada = $stmt->fetch();
-        if($dataValidada == null){
-            return false;
-        }
-        return $dataValidada['idPersona'];
-    }
-    
-    
-}
-
-
-function getRequest($pdo){
-    if(!validateToken($pdo)){
+function getRequest($pdo,$auth){
+    if(!$auth->validateToken($pdo)){
         http_response_code(403);
         echo json_encode(array("error" => "Unauthorized"));
         return;
@@ -116,7 +76,6 @@ function getRequest($pdo){
         $stmt->execute();
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $datos = $stmt->fetchAll();
-        $validate = validateToken($pdo);
         if($datos){
             header("HTTP/1.1 200 OK");
             echo json_encode([
@@ -131,8 +90,8 @@ function getRequest($pdo){
 }
 
 
-function postRequest($pdo){
-    if(!validateToken($pdo)){
+function postRequest($pdo,$auth){
+    if($auth->validateToken($pdo)){
         http_response_code(403);
         echo json_encode(array("error" => "Unauthorized"));
         return;

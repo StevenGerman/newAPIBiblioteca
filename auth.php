@@ -57,7 +57,7 @@ function getToken()
 
 function validateToken($pdo)
 {
-    $info = getToken();
+    $info = $this->getToken();
     if ($info == null) {
         return;
     } else {
