@@ -90,7 +90,7 @@ function getRequest($pdo,$auth){
 
 
 function postRequest($pdo,$auth){
-    if($auth->validateToken($pdo)){
+    if(!$auth->validateToken($pdo)){
         http_response_code(403);
         echo json_encode(array("error" => "Unauthorized"));
         return;
