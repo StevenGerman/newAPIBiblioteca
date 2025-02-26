@@ -48,7 +48,7 @@ function getRequest($pdo) {
         $sql->execute();
         $sql->setFetchMode(PDO::FETCH_ASSOC);
         header("HTTP/1.1 200 OK");
-        echo json_encode($sql->fetchAll());
+        echo json_encode($sql->fetch());
     }
     // Si se proporciona el parámetro 'perNombre', busca por nombre
     elseif (isset($_GET['perNombre'])) {

@@ -73,7 +73,7 @@ function registrarUsuario($pdo) {
                 exit;
             }
            
-            $rol = 1;
+            $rol = 2;
             // Insertar nuevo Usuario
             $sql = "INSERT INTO personas (perNombre, perApellido, perDni, perContrasena, rolID) 
                                   VALUES (:perNombre, :perApellido, :perDni, :perContrasena, :rolID)";
