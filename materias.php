@@ -37,7 +37,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         putRequest($pdo);
         break;
     case 'DELETE':
-        deleteRequest($pdo);
+        deleteRequest($pdo,$auth);
         break;
     case 'OPTIONS':
         // Maneja las solicitudes preflight
@@ -112,8 +112,12 @@ function postRequest($pdo,$auth){
     }
 }
 
-function deleteRequest($pdo){
-
+function deleteRequest($pdo,$auth){
+    if(!$auth->validateToken($pdo)){
+        http_response_code(403);
+        echo json_encode(array("error" => "Unauthorized"));
+        return;
+    }
     if(isset($_GET['idMateria'])){
         $sql = "DELETE FROM materias WHERE idMateria = :idMateria";
         $stmt = $pdo->prepare($sql);
